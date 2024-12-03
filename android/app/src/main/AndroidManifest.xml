@@ -3,7 +3,7 @@
         android:label="albir"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:taskAffinity="com.share.albir">
+        android:taskAffinity="com.shareself.albir">
         <activity
             android:name=".MainActivity"
             android:exported="true"

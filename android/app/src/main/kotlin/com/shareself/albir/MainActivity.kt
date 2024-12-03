@@ -1,4 +1,4 @@
-package com.share.albir
+package com.shareself.albir
 
 import io.flutter.embedding.android.FlutterActivity
 

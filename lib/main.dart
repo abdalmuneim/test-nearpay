@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
     nearpay = Nearpay(
       authType: authType,
       authValue: tokenKey,
-      env: Environments.sandbox,
+      env: Environments.production,
       locale: Locale.localeDefault,
     );
     await nearpay.initialize();
