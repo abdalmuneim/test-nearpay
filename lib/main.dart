@@ -49,8 +49,8 @@ class _MyHomePageState extends State<MyHomePage> {
       env: Environments.sandbox,
       locale: Locale.localeDefault,
     );
-
-    print("nearpay: ${nearpay.toString()}");
+    await nearpay.initialize();
+    await nearpay.setup();
   }
 
   @override
@@ -75,9 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await nearpay.setup();
-        },
+        onPressed: () async {},
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
