@@ -49,8 +49,8 @@ class _MyHomePageState extends State<MyHomePage> {
       env: Environments.sandbox,
       locale: Locale.localeDefault,
     );
-    //if you want to install the plugin immediatly after initializing then use the setup method (optional)
-    await nearpay.setup();
+
+    print("nearpay: ${nearpay.toString()}");
   }
 
   @override
@@ -75,7 +75,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          await nearpay.setup();
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
