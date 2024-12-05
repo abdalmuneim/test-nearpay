@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:nearpay_flutter_sdk/errors/purchase_error/purchase_error.dart';
 import 'package:nearpay_flutter_sdk/nearpay.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
   runApp(const MyApp());
@@ -50,11 +51,20 @@ class _MyHomePageState extends State<MyHomePage> {
     nearpay = Nearpay(
       authType: authType,
       authValue: tokenKey,
-      env: Environments.production,
+      env: Environments.sandbox,
       locale: Locale.localeDefault,
     );
-    await nearpay.initialize();
-    await nearpay.setup();
+    await nearpay
+        .initialize()
+        .then((value) => data["init"] = "done")
+        .catchError((onError) async => data["onErrorinit"] = await onError);
+    await nearpay
+        .setup()
+        .then((value) => data["setup"] = "done")
+        .catchError((onError) async => data["onErrorSetup"] = await onError);
+    setState(() {
+      data;
+    });
   }
 
   @override
@@ -73,20 +83,36 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: const Icon(Icons.install_mobile_outlined))
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              "response: ${jsonEncode(data)}",
-            ),
-            Text(
-              ' ',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
+      body: StreamBuilder<Map>(
+          stream: Stream.periodic(
+            const Duration(seconds: 2),
+            (computationCount) => data,
+          ),
+          builder: (context, AsyncSnapshot<Map> snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "response: ${snapshot.data}",
+                    ),
+                    Text(
+                      ' ',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () async => purchase(),
         tooltip: 'pay',
@@ -115,11 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
     await nearpay
         .purchase(
       amount: 0001, // [Required] ammount you want to set .
-      // transactionId: DateTime.now()
-      //     .millisecondsSinceEpoch
-      //     .toString(), // [Optional] specefy the transaction uuid for later referance
+      transactionId: const Uuid()
+          .v4(), // [Optional] specefy the transaction uuid for later referance
       customerReferenceNumber:
-          '123', // [Optional] any number you want to add as a refrence Any string as a reference number
+          'abcabc', // [Optional] any number you want to add as a refrence Any string as a reference number
       enableReceiptUi: true, // [Optional] show the reciept in ui
       enableReversalUi:
           true, // [Optional] it will allow you to enable or disable the reverse button
@@ -128,9 +153,9 @@ class _MyHomePageState extends State<MyHomePage> {
     )
         .then((response) {
       print(response.toJson());
-      data = response.toJson();
-    }).catchError((error) {
-      data = error.toJson();
+      data["response"] = response.toJson();
+    }).catchError((error) async {
+      data["error"] = await error.toJson();
       if (error is PurchaseAuthenticationFailed) {
         print("error PurchaseAuthenticationFailed:");
         // when the authentication failed .
